@@ -24,6 +24,7 @@ import com.rcmiku.ncmapi.utils.CookieProvider
 import com.rcmiku.ncmapi.utils.FileProvider
 import com.rcmiku.ncmapi.utils.UserAgentProvider
 import com.rcmiku.ncmapi.utils.json
+import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+
+private const val LEGACY_API_BASE_URL = "https://ncm-api.prod.gbclstudio.cn"
+private const val DEFAULT_API_BASE_URL = "https://netease.depresskid.top"
 
 @HiltAndroidApp
 class JetMeloApp : Application(), SingletonImageLoader.Factory {
@@ -62,6 +66,11 @@ class JetMeloApp : Application(), SingletonImageLoader.Factory {
                 }
         }
         applicationScope.launch {
+            dataStore.edit { prefs ->
+                if (prefs[apiBaseUrlKey] == LEGACY_API_BASE_URL) {
+                    prefs[apiBaseUrlKey] = DEFAULT_API_BASE_URL
+                }
+            }
             dataStore.data
                 .map { prefs ->
                     prefs[apiBaseUrlKey] to prefs[unblockBaseUrlKey]

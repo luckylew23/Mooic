@@ -85,7 +85,7 @@ fun SettingsScreen(navController: NavHostController) {
     var themeSeed by rememberEnumPreference(themeSeedColorKey, defaultValue = AppThemeSeed.PURPLE)
     var autoSkipNextOnError by rememberPreference(autoSkipNextOnErrorKey, false)
     var ncmCookie by rememberPreference(ncmCookieKey, "")
-    var apiBaseUrl by rememberPreference(apiBaseUrlKey, "https://ncm-api.prod.gbclstudio.cn")
+    var apiBaseUrl by rememberPreference(apiBaseUrlKey, "https://netease.depresskid.top")
     var unblockBaseUrl by rememberPreference(unblockBaseUrlKey, "https://unlock.depresskid.top")
 
     var showQualityDialog by remember { mutableStateOf(false) }
@@ -185,7 +185,7 @@ fun SettingsScreen(navController: NavHostController) {
         SettingItemData(
             title = stringResource(R.string.source_code),
             imageVector = Github,
-            onClick = { uriHandler.openUri("https://github.com/rcmiku/JetMelo") }
+            onClick = { uriHandler.openUri("https://github.com/kid-depress/Mooic") }
         )
     )
 
@@ -298,7 +298,7 @@ fun SettingsScreen(navController: NavHostController) {
         UrlEditDialog(
             title = stringResource(R.string.api_server),
             currentUrl = apiBaseUrl,
-            defaultUrl = "https://ncm-api.prod.gbclstudio.cn",
+            defaultUrl = "https://netease.depresskid.top",
             onDismiss = { showApiUrlDialog = false },
             onConfirm = { apiBaseUrl = it }
         )

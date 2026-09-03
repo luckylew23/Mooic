@@ -21,7 +21,7 @@ import io.ktor.http.encodeURLParameter
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 
-var API_BASE_URL = "https://ncm-api.prod.gbclstudio.cn"
+var API_BASE_URL = "https://netease.depresskid.top"
 var UNBLOCK_BASE_URL = "https://unlock.depresskid.top"
 
 val apiClient = HttpClient(OkHttp) {
