@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -33,11 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rcmiku.music.LocalPlayerState
 import com.rcmiku.music.R
+import com.rcmiku.music.constants.heartBeatModeKey
 import com.rcmiku.music.ui.icons.Album
 import com.rcmiku.music.ui.icons.Artist
+import com.rcmiku.music.ui.icons.FavoriteFill
 import com.rcmiku.music.ui.icons.SongListAdd
 import com.rcmiku.music.ui.icons.Timelapse
 import com.rcmiku.music.ui.icons.Timer
+import com.rcmiku.music.utils.rememberPreference
 import com.rcmiku.ncmapi.model.Artist
 import com.rcmiku.ncmapi.model.Song
 import com.rcmiku.ncmapi.model.SongAlbum
@@ -215,12 +220,7 @@ fun PlayerMenuBottomSheet(
 
                 item {
                     Card(
-                        shape = RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 16.dp,
-                            bottomEnd = 16.dp
-                        ),
+                        shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Row(
@@ -254,6 +254,43 @@ fun PlayerMenuBottomSheet(
                                 text = stringResource(R.string.share),
                                 style = MaterialTheme.typography.titleMedium
                             )
+                        }
+                    }
+                }
+
+                item {
+                    var heartBeatMode by rememberPreference(heartBeatModeKey, false)
+                    Card(
+                        shape = RoundedCornerShape(
+                            topStart = 8.dp,
+                            topEnd = 8.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        ),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .clickable { heartBeatMode = !heartBeatMode },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = FavoriteFill,
+                                contentDescription = null,
+                                Modifier.padding(horizontal = 12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.heart_beat_mode),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Switch(
+                                checked = heartBeatMode,
+                                onCheckedChange = { heartBeatMode = it }
+                            )
+                            Spacer(Modifier.width(12.dp))
                         }
                     }
                 }

@@ -506,3 +506,56 @@ data class RepliedComment(
     val user: CommentUser = CommentUser(),
     val content: String = ""
 )
+
+// ========== Personal FM models ==========
+
+@Serializable
+data class PersonalFmResponse(
+    val data: List<PersonalFmSong> = emptyList()
+)
+
+@Serializable
+data class PersonalFmSong(
+    val id: Long = 0,
+    val name: String = "",
+    val artists: List<Artist> = emptyList(),
+    val album: FmAlbum = FmAlbum(),
+    val duration: Long = 0,
+    val alias: List<String> = emptyList(),
+    val mvid: Long = 0,
+    val fee: Int = 0,
+    val privilege: SongPrivilege? = null
+) {
+    fun toSong() = Song(
+        id = id,
+        name = name,
+        ar = artists,
+        al = album.toSongAlbum(),
+        dt = duration,
+        mv = mvid,
+        alia = alias,
+        fee = fee,
+        privilege = privilege
+    )
+}
+
+@Serializable
+data class FmAlbum(
+    val id: Long = 0,
+    val name: String = "",
+    @SerialName("picUrl") val picUrl: String = "",
+    val pic: Long = 0,
+    @SerialName("blurPicUrl") val blurPicUrl: String = ""
+) {
+    fun toSongAlbum() = SongAlbum(
+        id = id,
+        name = name,
+        picUrl = picUrl.ifBlank { blurPicUrl },
+        pic = pic
+    )
+}
+
+@Serializable
+data class SongDetailResponse(
+    val songs: List<Song> = emptyList()
+)

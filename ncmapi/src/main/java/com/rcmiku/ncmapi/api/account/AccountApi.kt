@@ -91,18 +91,28 @@ object AccountApi {
         songIds: List<Long>,
         manipulateType: PlayManipulateType = PlayManipulateType.ADD
     ): Result<ApiCodeResponse> {
-        return if (manipulateType == PlayManipulateType.ADD) {
-            apiGet("/playlist/track/add", mapOf(
+        val result = if (manipulateType == PlayManipulateType.ADD) {
+            apiGet<ApiCodeResponse>("/playlist/track/add", mapOf(
                 "op" to "add",
                 "pid" to playlistId,
                 "tracks" to songIds.joinToString(",")
             ))
         } else {
-            apiGet("/playlist/track/delete", mapOf(
+            apiGet<ApiCodeResponse>("/playlist/track/delete", mapOf(
                 "op" to "del",
                 "pid" to playlistId,
                 "tracks" to songIds.joinToString(",")
             ))
+        }
+        return result.mapCatching {
+            if (it.code == 200) {
+                it
+            } else {
+                val reason = it.message?.takeIf(String::isNotBlank)
+                    ?: it.msg?.takeIf(String::isNotBlank)
+                    ?: "服务端返回业务码 ${it.code}"
+                throw IllegalStateException(reason)
+            }
         }
     }
 
