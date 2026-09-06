@@ -90,4 +90,11 @@
     <string name="reset_default">重置默认</string>
     <string name="server_settings">服务器设置</string>
     <string name="click_to_login">点击登录</string>
+    <string name="comment">评论</string>
+    <string name="comment_hot">热门评论</string>
+    <string name="comment_latest">最新评论</string>
+    <string name="comment_count">共 %1$d 条评论</string>
+    <string name="comment_empty">暂无评论</string>
+    <string name="comment_load_failed">评论加载失败</string>
+    <string name="allow_simultaneous_playback">允许与其他应用同时播放</string>
 </resources>

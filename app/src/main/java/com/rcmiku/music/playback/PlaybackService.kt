@@ -41,6 +41,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.rcmiku.music.MainActivity
 import com.rcmiku.music.R
 import com.rcmiku.music.constants.MediaSessionConstants
+import com.rcmiku.music.constants.allowSimultaneousPlaybackKey
 import com.rcmiku.music.constants.audioQualityKey
 import com.rcmiku.music.constants.use40DpIconKey
 import com.rcmiku.music.constants.userIdKye
@@ -77,6 +78,7 @@ class PlaybackService : MediaSessionService() {
     private val use40DpIcon by preference(this, use40DpIconKey, false)
     private val userId by preference(this, userIdKye, 0L)
     private val audioQuality by enumPreference(this, audioQualityKey, SongLevel.STANDARD)
+    private val allowSimultaneousPlayback by preference(this, allowSimultaneousPlaybackKey, false)
     private var scrobbleJob: Job? = null
     private var scrobbleState: ScrobbleState? = null
 
@@ -182,6 +184,11 @@ class PlaybackService : MediaSessionService() {
                 .setAudioOffloadPreferences(audioOffloadPreferences)
                 .build()
         player.repeatMode = REPEAT_MODE_ALL
+        // 默认独占音频焦点；开启"允许与其他应用同时播放"后不再请求焦点（handleAudioFocus=false）
+        player.setAudioAttributes(
+            player.audioAttributes,
+            !allowSimultaneousPlayback
+        )
         mediaSession = MediaSession.Builder(this, player)
             .setSessionActivity(
                 PendingIntent.getActivity(
@@ -193,6 +200,7 @@ class PlaybackService : MediaSessionService() {
             ).setCallback(MediaSessionCallback())
             .setCustomLayout(ImmutableList.of(favoriteButton, shuffleButton)).build()
         observeIconPreference()
+        observeAudioFocusPreference(player)
         observeFavoriteSongIds()
         observeScrobble(player)
     }
@@ -406,6 +414,21 @@ class PlaybackService : MediaSessionService() {
             applicationContext.dataStore.data.debounce(1000)
                 .map { it[use40DpIconKey] ?: false }.distinctUntilChanged().collect {
                     updateCustomLayout()
+                }
+        }
+    }
+
+    @kotlin.OptIn(FlowPreview::class)
+    private fun observeAudioFocusPreference(player: Player) {
+        scope.launch {
+            applicationContext.dataStore.data
+                .map { it[allowSimultaneousPlaybackKey] ?: false }
+                .distinctUntilChanged()
+                .collect { allow ->
+                    player.setAudioAttributes(
+                        player.audioAttributes,
+                        !allow
+                    )
                 }
         }
     }

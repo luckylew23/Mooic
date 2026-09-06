@@ -472,3 +472,37 @@ data class ApiCodeResponse(
     val message: String? = null,
     val msg: String? = null
 )
+
+// ========== Comment models ==========
+
+@Serializable
+data class CommentResponse(
+    val comments: List<Comment> = emptyList(),
+    val hotComments: List<Comment> = emptyList(),
+    val topComments: List<Comment> = emptyList(),
+    val total: Long = 0,
+    val hasMore: Boolean = false
+)
+
+@Serializable
+data class Comment(
+    val user: CommentUser = CommentUser(),
+    val content: String = "",
+    val time: Long = 0,
+    @SerialName("likedCount") val likedCount: Long = 0,
+    @SerialName("beReplied") val beReplied: List<RepliedComment> = emptyList(),
+    val replyCount: Long = 0
+)
+
+@Serializable
+data class CommentUser(
+    @SerialName("userId") val userId: Long = 0,
+    val nickname: String = "",
+    @SerialName("avatarUrl") val avatarUrl: String = ""
+)
+
+@Serializable
+data class RepliedComment(
+    val user: CommentUser = CommentUser(),
+    val content: String = ""
+)

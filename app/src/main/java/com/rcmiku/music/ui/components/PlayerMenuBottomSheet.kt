@@ -33,10 +33,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rcmiku.music.LocalPlayerState
 import com.rcmiku.music.R
+import com.rcmiku.music.ui.icons.Album
+import com.rcmiku.music.ui.icons.Artist
 import com.rcmiku.music.ui.icons.SongListAdd
 import com.rcmiku.music.ui.icons.Timelapse
 import com.rcmiku.music.ui.icons.Timer
+import com.rcmiku.ncmapi.model.Artist
 import com.rcmiku.ncmapi.model.Song
+import com.rcmiku.ncmapi.model.SongAlbum
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -46,9 +50,12 @@ fun PlayerMenuBottomSheet(
     currentSong: Song? = null,
     openBottomSheet: Boolean,
     onDismiss: () -> Unit,
+    onArtistClick: (Artist) -> Unit = {},
+    onAlbumClick: (SongAlbum) -> Unit = {},
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var timePicker by rememberSaveable { mutableStateOf(false) }
+    var openArtistBottomSheet by rememberSaveable { mutableStateOf(false) }
     val playerState = LocalPlayerState.current
     val isSleepTimerSet = playerState?.isSleepTimerSet == true
     val context = LocalContext.current
@@ -154,6 +161,60 @@ fun PlayerMenuBottomSheet(
 
                 item {
                     Card(
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .clickable {
+                                    openArtistBottomSheet = true
+                                    onDismiss()
+                                }, verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Artist,
+                                contentDescription = null,
+                                Modifier.padding(horizontal = 12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.view_artist),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .clickable {
+                                    openArtistBottomSheet = true
+                                    onDismiss()
+                                }, verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Album,
+                                contentDescription = null,
+                                Modifier.padding(horizontal = 12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.view_album),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Card(
                         shape = RoundedCornerShape(
                             topStart = 8.dp,
                             topEnd = 8.dp,
@@ -231,5 +292,15 @@ fun PlayerMenuBottomSheet(
     SongListBottomSheet(song = currentSong, onDismiss = {
         openSongListBottomSheet = false
     }, openBottomSheet = openSongListBottomSheet)
+
+    currentSong?.let {
+        ArtistBottomSheet(
+            currentSong = it,
+            onClick = onArtistClick,
+            onDismiss = { openArtistBottomSheet = false },
+            openBottomSheet = openArtistBottomSheet,
+            onAlbumClick = onAlbumClick
+        )
+    }
 
 }
