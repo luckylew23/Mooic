@@ -4,6 +4,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -19,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +34,9 @@ import com.rcmiku.music.R
 import com.rcmiku.ncmapi.api.player.PlayerApi
 import com.rcmiku.ncmapi.api.player.SongLevel
 import com.rcmiku.ncmapi.model.Song
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 private val SongLevel.labelRes: Int
@@ -51,7 +55,18 @@ internal fun sanitizeFileName(name: String): String =
     name.replace(Regex("""[\\/:*?"<>|]"""), "_").trim().ifBlank { "unknown" }
 
 /**
- * 下载对话框：选择音质后通过系统 DownloadManager 下载到公共下载目录
+ * 应用级下载协程作用域：对话框关闭（Composable 移除）后下载仍继续
+ */
+private val appDownloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+private fun toastOnMain(context: Context, resId: Int) {
+    Handler(Looper.getMainLooper()).post {
+        Toast.makeText(context, resId, Toast.LENGTH_SHORT).show()
+    }
+}
+
+/**
+ * 下载对话框：选择音质后立即关闭，后台通过系统 DownloadManager 下载到公共下载目录
  */
 @Composable
 fun DownloadQualityDialog(
@@ -61,12 +76,10 @@ fun DownloadQualityDialog(
 ) {
     if (!show || song == null) return
     var selectedLevel by remember { mutableStateOf(SongLevel.EXHIGH) }
-    var downloading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     AlertDialog(
-        onDismissRequest = { if (!downloading) onDismiss() },
+        onDismissRequest = onDismiss,
         title = { Text(text = stringResource(R.string.download)) },
         text = {
             Column {
@@ -89,13 +102,13 @@ fun DownloadQualityDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { if (!downloading) selectedLevel = level }
+                                .clickable { selectedLevel = level }
                                 .padding(vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
                                 selected = selectedLevel == level,
-                                onClick = { if (!downloading) selectedLevel = level }
+                                onClick = { selectedLevel = level }
                             )
                             Text(
                                 text = stringResource(level.labelRes),
@@ -108,26 +121,16 @@ fun DownloadQualityDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = !downloading,
                 onClick = {
-                    scope.launch {
-                        downloading = true
-                        val result = downloadSong(context, song, selectedLevel)
-                        downloading = false
-                        result.onSuccess {
-                            Toast.makeText(
-                                context,
-                                R.string.download_started,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }.onFailure {
-                            Toast.makeText(
-                                context,
-                                R.string.download_failed,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        onDismiss()
+                    val targetSong = song
+                    val targetLevel = selectedLevel
+                    val appContext = context.applicationContext
+                    // 立即关闭对话框，后台继续下载
+                    onDismiss()
+                    appDownloadScope.launch {
+                        downloadSong(appContext, targetSong, targetLevel)
+                            .onSuccess { toastOnMain(appContext, R.string.download_started) }
+                            .onFailure { toastOnMain(appContext, R.string.download_failed) }
                     }
                 }
             ) {
@@ -135,7 +138,7 @@ fun DownloadQualityDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !downloading) {
+            TextButton(onClick = onDismiss) {
                 Text(text = stringResource(R.string.cancel))
             }
         }

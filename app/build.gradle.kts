@@ -28,8 +28,8 @@ android {
         applicationId = "com.rcmiku.music"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0.7"
+        versionCode = 3
+        versionName = "2.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
