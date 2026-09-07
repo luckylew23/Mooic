@@ -44,10 +44,10 @@ private val SongLevel.labelRes: Int
         SongLevel.HIRES -> R.string.quality_hires
     }
 
-private fun SongLevel.extension(): String =
+internal fun SongLevel.extension(): String =
     if (this == SongLevel.LOSSLESS || this == SongLevel.HIRES) "flac" else "mp3"
 
-private fun sanitizeFileName(name: String): String =
+internal fun sanitizeFileName(name: String): String =
     name.replace(Regex("""[\\/:*?"<>|]"""), "_").trim().ifBlank { "unknown" }
 
 /**
@@ -56,9 +56,10 @@ private fun sanitizeFileName(name: String): String =
 @Composable
 fun DownloadQualityDialog(
     song: Song?,
+    show: Boolean,
     onDismiss: () -> Unit
 ) {
-    if (song == null) return
+    if (!show || song == null) return
     var selectedLevel by remember { mutableStateOf(SongLevel.EXHIGH) }
     var downloading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()

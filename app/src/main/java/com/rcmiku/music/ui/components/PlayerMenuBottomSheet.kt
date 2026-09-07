@@ -375,6 +375,7 @@ fun PlayerMenuBottomSheet(
         )
         DownloadQualityDialog(
             song = song,
+            show = openDownloadDialog,
             onDismiss = { openDownloadDialog = false }
         )
     }
