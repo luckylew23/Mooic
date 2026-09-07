@@ -473,6 +473,37 @@ data class ApiCodeResponse(
     val msg: String? = null
 )
 
+// ========== Artist / Album subscribe models ==========
+
+@Serializable
+data class ArtistSublistResponse(
+    val data: ArtistSublistData = ArtistSublistData()
+)
+
+@Serializable
+data class ArtistSublistData(
+    val list: List<ArtistSublistItem> = emptyList()
+)
+
+@Serializable
+data class ArtistSublistItem(
+    val id: Long = 0,
+    val name: String = "",
+    @SerialName("img1v1Url") val img1v1Url: String = "",
+    val musicSize: Int = 0,
+    val albumSize: Int = 0
+)
+
+@Serializable
+data class AlbumSubscribeListResponse(
+    val data: AlbumSubscribeListData = AlbumSubscribeListData()
+)
+
+@Serializable
+data class AlbumSubscribeListData(
+    val list: List<SubAlbum> = emptyList()
+)
+
 // ========== Comment models ==========
 
 @Serializable

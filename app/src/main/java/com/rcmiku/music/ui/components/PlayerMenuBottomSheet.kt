@@ -38,6 +38,7 @@ import com.rcmiku.music.R
 import com.rcmiku.music.constants.heartBeatModeKey
 import com.rcmiku.music.ui.icons.Album
 import com.rcmiku.music.ui.icons.Artist
+import com.rcmiku.music.ui.icons.Download
 import com.rcmiku.music.ui.icons.FavoriteFill
 import com.rcmiku.music.ui.icons.SongListAdd
 import com.rcmiku.music.ui.icons.Timelapse
@@ -60,7 +61,9 @@ fun PlayerMenuBottomSheet(
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var timePicker by rememberSaveable { mutableStateOf(false) }
-    var openArtistBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var openArtistInfoSheet by rememberSaveable { mutableStateOf(false) }
+    var openAlbumInfoSheet by rememberSaveable { mutableStateOf(false) }
+    var openDownloadDialog by rememberSaveable { mutableStateOf(false) }
     val playerState = LocalPlayerState.current
     val isSleepTimerSet = playerState?.isSleepTimerSet == true
     val context = LocalContext.current
@@ -174,7 +177,7 @@ fun PlayerMenuBottomSheet(
                                 .fillMaxWidth()
                                 .height(64.dp)
                                 .clickable {
-                                    openArtistBottomSheet = true
+                                    openArtistInfoSheet = true
                                     onDismiss()
                                 }, verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -201,7 +204,7 @@ fun PlayerMenuBottomSheet(
                                 .fillMaxWidth()
                                 .height(64.dp)
                                 .clickable {
-                                    openArtistBottomSheet = true
+                                    openAlbumInfoSheet = true
                                     onDismiss()
                                 }, verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -212,6 +215,33 @@ fun PlayerMenuBottomSheet(
                             )
                             Text(
                                 text = stringResource(R.string.view_album),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .clickable {
+                                    openDownloadDialog = true
+                                    onDismiss()
+                                }, verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Download,
+                                contentDescription = null,
+                                Modifier.padding(horizontal = 12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.download),
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
@@ -330,13 +360,22 @@ fun PlayerMenuBottomSheet(
         openSongListBottomSheet = false
     }, openBottomSheet = openSongListBottomSheet)
 
-    currentSong?.let {
-        ArtistBottomSheet(
-            currentSong = it,
+    currentSong?.let { song ->
+        ArtistInfoSheet(
+            song = song,
             onClick = onArtistClick,
-            onDismiss = { openArtistBottomSheet = false },
-            openBottomSheet = openArtistBottomSheet,
-            onAlbumClick = onAlbumClick
+            onDismiss = { openArtistInfoSheet = false },
+            openBottomSheet = openArtistInfoSheet
+        )
+        AlbumInfoSheet(
+            song = song,
+            onClick = onAlbumClick,
+            onDismiss = { openAlbumInfoSheet = false },
+            openBottomSheet = openAlbumInfoSheet
+        )
+        DownloadQualityDialog(
+            song = song,
+            onDismiss = { openDownloadDialog = false }
         )
     }
 

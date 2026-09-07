@@ -407,20 +407,18 @@ fun Player(
         }
 
 
-        currentSong?.let {
-            ArtistBottomSheet(
-                currentSong = it,
+        currentSong?.let { song ->
+            ArtistInfoSheet(
+                song = song,
                 onClick = { artist ->
                     navController.navigate(ArtistNav(artistId = artist.id))
                     onBackPressed()
-                }, onDismiss = {
+                },
+                onDismiss = {
                     openBottomSheet = false
                 },
-                openBottomSheet = openBottomSheet,
-                onAlbumClick = { album ->
-                    navController.navigate(AlbumNav(albumId = album.id))
-                    onBackPressed()
-                })
+                openBottomSheet = openBottomSheet
+            )
         }
 
         PlayerMenuBottomSheet(
@@ -446,98 +444,3 @@ fun Player(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ArtistBottomSheet(
-    currentSong: Song,
-    onClick: (Artist) -> Unit,
-    openBottomSheet: Boolean,
-    onDismiss: () -> Unit,
-    onAlbumClick: (SongAlbum) -> Unit,
-) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    LaunchedEffect(openBottomSheet) {
-        if (openBottomSheet) {
-            bottomSheetState.show()
-        } else {
-            bottomSheetState.hide()
-        }
-    }
-
-    if (openBottomSheet) {
-        ModalBottomSheet(
-            modifier = Modifier.statusBarsPadding(),
-            onDismissRequest = onDismiss,
-            sheetState = bottomSheetState
-        ) {
-            LazyColumn(
-                Modifier.padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                itemsIndexed(currentSong.ar) { index, artist ->
-                    val shape = getItemShape(
-                        prevItem = currentSong.ar.getOrNull(index - 1),
-                        nextItem = currentSong.ar.getOrNull(index + 1),
-                        corner = 16.dp,
-                        subCorner = 4.dp,
-                    )
-                    Card(
-                        shape = shape,
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp)
-                                .clickable {
-                                    onDismiss()
-                                    onClick(artist)
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Artist,
-                                contentDescription = null,
-                                Modifier.padding(horizontal = 12.dp)
-                            )
-                            Text(text = artist.name, style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
-                }
-                item {
-                    Spacer(Modifier.height(4.dp))
-                }
-                item {
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp)
-                                .clickable {
-                                    onDismiss()
-                                    onAlbumClick(currentSong.al)
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Album,
-                                contentDescription = null,
-                                Modifier.padding(horizontal = 12.dp)
-                            )
-                            Text(
-                                text = currentSong.al.name,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    }
-                }
-                item {
-                    Spacer(Modifier.height(12.dp))
-                }
-            }
-        }
-    }
-}
